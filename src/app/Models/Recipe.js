@@ -10,6 +10,7 @@ const Recipe = new Schema(
     Ingredients: { type: String, required: true },
     Steps: { type: String, required: true },
     IDAuthor: {type: String, required: true},
+    Status: {type: String, default: "INCONFIRM"},
   },
   {
     timestamps: true,

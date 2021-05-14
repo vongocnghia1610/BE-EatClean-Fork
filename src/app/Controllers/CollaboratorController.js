@@ -15,39 +15,31 @@ class CollaboratorController {
   // Post collaborator/create-blog
   async CreateBlog(req, res, next) {
     try {
-      const {
-        BlogTitle,
-        BlogAuthor,
-        BlogContent,
-        IDAuthor,
-      } = req.body;
+      const { BlogTitle, BlogAuthor, BlogContent, IDAuthor } = req.body;
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
-      const userDb = await User.findOne({ _id ,Status: "ACTIVE"});
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       console.log(userDb._doc.IDRole);
-      var role = await Role.findOne({_id: userDb._doc.IDRole});
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
       console.log(role._doc.RoleName);
       if (role._doc.RoleName == "Collaborator") {
         const blog = await Blog.create({
           BlogTitle,
           BlogAuthor: userDb._doc.FullName,
           BlogContent,
-          IDAuthor: userDb._doc._id, 
+          IDAuthor: userDb._doc._id,
         });
         res.status(200).send({
           data: blog,
           error: "",
         });
-        }
-        else
-        {
-          res.status(400).send({
-            data: "",
-            error: "No Autheraziton",
-          });
-        }
-      } 
-       catch (error) {
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
       res.status(500).send({
         data: error,
         error: "Internal Server Error",
@@ -58,22 +50,19 @@ class CollaboratorController {
 
   async UpdateBlog(req, res, next) {
     try {
-      const {
-        BlogTitle,
-        BlogContent,
-      } = req.body;
+      const { BlogTitle, BlogContent } = req.body;
       var update = {
         BlogTitle,
         BlogContent,
-      }
+      };
       var _IDBlog = req.body.IDBlog;
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
-      const userDb = await User.findOne({ _id ,Status: "ACTIVE"});
-      var blog = await Blog.findOne({_id: _IDBlog})
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var blog = await Blog.findOne({ _id: _IDBlog });
       if (blog._doc.IDAuthor == userDb._doc._id) {
         const blogUpdate = await Blog.findOneAndUpdate(
-          { _id: _IDBlog},
+          { _id: _IDBlog },
           update,
           {
             new: true,
@@ -83,16 +72,13 @@ class CollaboratorController {
           data: blogUpdate,
           error: "",
         });
-        }
-        else
-        {
-          res.status(400).send({
-            data: "",
-            error: "No Autheraziton",
-          });
-        }
-      } 
-       catch (error) {
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
       res.status(500).send({
         data: error,
         error: "Internal Server Error",
@@ -105,16 +91,16 @@ class CollaboratorController {
     try {
       var update = {
         Status: "Deleted",
-      }
+      };
       var _IDBlog = req.query.id;
       console.log(_IDBlog);
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
-      const userDb = await User.findOne({ _id ,Status: "ACTIVE"});
-      var blog = await Blog.findOne({_id: _IDBlog})
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var blog = await Blog.findOne({ _id: _IDBlog });
       if (blog._doc.IDAuthor == userDb._doc._id) {
         const blogUpdate = await Blog.findOneAndUpdate(
-          { _id: _IDBlog},
+          { _id: _IDBlog },
           update,
           {
             new: true,
@@ -124,16 +110,13 @@ class CollaboratorController {
           data: blogUpdate,
           error: "",
         });
-        }
-        else
-        {
-          res.status(400).send({
-            data: "",
-            error: "No Autheraziton",
-          });
-        }
-      } 
-       catch (error) {
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
       res.status(500).send({
         data: error,
         error: "Internal Server Error",
@@ -141,42 +124,41 @@ class CollaboratorController {
     }
   }
 
-   // Post collaborator/create-recipe
-   async CreateBlog(req, res, next) {
+  // Post collaborator/create-recipe
+  async CreateRecipe(req, res, next) {
     try {
       const {
         RecipesTitle,
         RecipesContent,
         NutritionalIngredients,
-        IDAuthor,
+        Ingredients,
+        Steps,
       } = req.body;
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
-      const userDb = await User.findOne({ _id ,Status: "ACTIVE"});
-      console.log(userDb._doc.IDRole);
-      var role = await Role.findOne({_id: userDb._doc.IDRole});
-      console.log(role._doc.RoleName);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
       if (role._doc.RoleName == "Collaborator") {
-        const blog = await Blog.create({
-          BlogTitle,
-          BlogAuthor: userDb._doc.FullName,
-          BlogContent,
-          IDAuthor: userDb._doc._id, 
+        const recipe = await Recipe.create({
+          RecipesTitle,
+          RecipesContent,
+          RecipesAuthor: userDb._doc.FullName,
+          NutritionalIngredients,
+          Ingredients,
+          Steps,
+          IDAuthor: userDb._doc._id,
         });
         res.status(200).send({
-          data: blog,
+          data: recipe,
           error: "",
         });
-        }
-        else
-        {
-          res.status(400).send({
-            data: "",
-            error: "No Autheraziton",
-          });
-        }
-      } 
-       catch (error) {
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
       res.status(500).send({
         data: error,
         error: "Internal Server Error",
@@ -184,5 +166,90 @@ class CollaboratorController {
     }
   }
 
+  // Put collaborator/update-recipe
+
+  async UpdateRecipe(req, res, next) {
+    try {
+      const {
+        RecipesTitle,
+        RecipesContent,
+        NutritionalIngredients,
+        Ingredients,
+        Steps,
+      } = req.body;
+      var update = {
+        RecipesTitle,
+        RecipesContent,
+        NutritionalIngredients,
+        Ingredients,
+        Steps,
+      };
+      var _IDRecipe = req.body.IDRecipe;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var recipe = await Recipe.findOne({ _id: _IDRecipe });
+      if (recipe._doc.IDAuthor == userDb._doc._id) {
+        const recipeUpdate = await Recipe.findOneAndUpdate(
+          { _id: _IDRecipe },
+          update,
+          {
+            new: true,
+          }
+        );
+        res.status(200).send({
+          data: recipeUpdate,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
+
+  // Delete collaborator/delete-recipe
+  async DeleteRecipe(req, res, next) {
+    try {
+      var update = {
+        Status: "Deleted",
+      };
+      var _IDRecipe = req.query.id;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var recipe = await Recipe.findOne({ _id: _IDRecipe });
+      if (recipe._doc.IDAuthor == userDb._doc._id) {
+        const recipeUpdate = await Recipe.findOneAndUpdate(
+          { _id: _IDRecipe },
+          update,
+          {
+            new: true,
+          }
+        );
+        res.status(200).send({
+          data: recipeUpdate,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
 }
-  module.exports = new CollaboratorController();
+module.exports = new CollaboratorController();
