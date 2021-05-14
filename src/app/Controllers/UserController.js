@@ -3,6 +3,7 @@ const User = require("../Models/User");
 const Role = require("../Models/Role");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const { UploadImage } = require("./index");
 const {
   createToken,
   verifyToken,
@@ -13,16 +14,16 @@ class UserController {
   //Post user/register-user
   async RegisterUser(req, res, next) {
     try {
-      const {
-        Email,
-        Password,
-        Phone,
-        FullName,
-        Gender,
-        Image,
-        LoginFB,
-        IDRole,
-      } = req.body;
+     
+      const Email = req.body.Email;
+      const Password = req.body.Password;
+      const Phone = req.body.Phone;
+      const FullName = req.body.FullName;
+      const Gender = req.body.Gender;
+      const Image = req.files["Image"][0];
+      const LoginFB = req.body.LoginFB;
+      const urlImage = await UploadImage(Image.filename, "Avatar");
+
       const result = await User.findOne({ Email });
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
@@ -32,7 +33,7 @@ class UserController {
           Phone,
           FullName,
           Gender,
-          Image,
+          Image : urlImage,
           LoginFB,
         });
         var id_account = user._doc._id;
@@ -83,16 +84,15 @@ class UserController {
   //Post user/register-user
   async RegisterCollaborator(req, res, next) {
     try {
-      const {
-        Email,
-        Password,
-        Phone,
-        FullName,
-        Gender,
-        Image,
-        LoginFB,
-        IDRole,
-      } = req.body;
+      const Email = req.body.Email;
+      const Password = req.body.Password;
+      const Phone = req.body.Phone;
+      const FullName = req.body.FullName;
+      const Gender = req.body.Gender;
+      const Image = req.files["Image"][0];
+      const LoginFB = req.body.LoginFB;
+      const urlImage = await UploadImage(Image.filename, "Avatar");
+
       const result = await User.findOne({ Email });
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
@@ -102,7 +102,7 @@ class UserController {
           Phone,
           FullName,
           Gender,
-          Image,
+          Image: urlImage,
           LoginFB,
           IDRole: "609d2d03fee09d75f011158c",
         });
