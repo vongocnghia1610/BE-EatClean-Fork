@@ -7,7 +7,9 @@ const Recipe = new Schema(
     RecipesAuthor: { type: String, required: true },
     RecipesContent: { type: String, required: true },
     NutritionalIngredients: { type: String, required: true },
+    Ingredients: { type: String, required: true },
     Steps: { type: String, required: true },
+    IDAuthor: {type: String, required: true},
   },
   {
     timestamps: true,

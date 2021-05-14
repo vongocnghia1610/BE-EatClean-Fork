@@ -12,7 +12,7 @@ const {
   makePassword,
 } = require("./index");
 class CollaboratorController {
-  // Post collaborator/create-recipe
+  // Post collaborator/create-blog
   async CreateBlog(req, res, next) {
     try {
       const {
@@ -54,7 +54,7 @@ class CollaboratorController {
       });
     }
   }
-  // Put collaborator/update-recipe
+  // Put collaborator/update-blog
 
   async UpdateBlog(req, res, next) {
     try {
@@ -100,7 +100,7 @@ class CollaboratorController {
     }
   }
 
-  // Delete collaborator/delete-recipe
+  // Delete collaborator/delete-blog
   async DeleteBlog(req, res, next) {
     try {
       var update = {
@@ -122,6 +122,49 @@ class CollaboratorController {
         );
         res.status(200).send({
           data: blogUpdate,
+          error: "",
+        });
+        }
+        else
+        {
+          res.status(400).send({
+            data: "",
+            error: "No Autheraziton",
+          });
+        }
+      } 
+       catch (error) {
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
+
+   // Post collaborator/create-recipe
+   async CreateBlog(req, res, next) {
+    try {
+      const {
+        RecipesTitle,
+        RecipesContent,
+        NutritionalIngredients,
+        IDAuthor,
+      } = req.body;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id ,Status: "ACTIVE"});
+      console.log(userDb._doc.IDRole);
+      var role = await Role.findOne({_id: userDb._doc.IDRole});
+      console.log(role._doc.RoleName);
+      if (role._doc.RoleName == "Collaborator") {
+        const blog = await Blog.create({
+          BlogTitle,
+          BlogAuthor: userDb._doc.FullName,
+          BlogContent,
+          IDAuthor: userDb._doc._id, 
+        });
+        res.status(200).send({
+          data: blog,
           error: "",
         });
         }
