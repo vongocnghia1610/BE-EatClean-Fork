@@ -22,7 +22,7 @@ class UserController {
       const Gender = req.body.Gender;
       const Image = req.files["Image"][0];
       const LoginFB = req.body.LoginFB;
-      const urlImage = await UploadImage(Image.filename, "Avatar");
+      const urlImage = await UploadImage(Image.filename, "Avatars/");
 
       const result = await User.findOne({ Email });
       if (result == null) {
@@ -91,7 +91,7 @@ class UserController {
       const Gender = req.body.Gender;
       const Image = req.files["Image"][0];
       const LoginFB = req.body.LoginFB;
-      const urlImage = await UploadImage(Image.filename, "Avatar");
+      const urlImage = await UploadImage(Image.filename, "Avatars/");
 
       const result = await User.findOne({ Email });
       if (result == null) {
