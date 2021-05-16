@@ -5,7 +5,6 @@ const BlogImage = new Schema(
   {
     BlogImages: { type: String, required: true },
     IDBlog: { type: String, required: true },
-    Status: {type: String, default: "ACTIVE"}
   },
   {
     timestamps: true,

@@ -3,7 +3,6 @@ const User = require("../Models/User");
 const Role = require("../Models/Role");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
-
 const { UploadImage } = require("./index");
 const {
   createToken,
@@ -19,8 +18,6 @@ class UserController {
       const Email = req.body.Email;
       const Password = req.body.Password;
       const FullName = req.body.FullName;
-      const Image = req.files["Image"][0];
-      const urlImage = await UploadImage(Image.filename, "Avatars/");
       const result = await User.findOne({ Username });
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
@@ -29,7 +26,6 @@ class UserController {
           Email,
           Password: hashPassword,
           FullName,
-          Image : urlImage,
         });
         var id_account = user._doc._id;
         const token = await createTokenTime(`${id_account}`);
@@ -83,9 +79,6 @@ class UserController {
       const Email = req.body.Email;
       const Password = req.body.Password;
       const FullName = req.body.FullName;
-      const Image = req.files["Image"][0];
-      const urlImage = await UploadImage(Image.filename, "Avatars/");
-
       const result = await User.findOne({ Username });
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
@@ -94,7 +87,6 @@ class UserController {
           Email,
           Password: hashPassword,
           FullName,
-          Image: urlImage,
           IDRole: "609d2d03fee09d75f011158c",
         });
         var id_account = user._doc._id;

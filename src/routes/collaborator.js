@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 var cpUpload = upload.fields([{ name: 'Image', maxCount: 100 }]);
 router.post("/create-blog",cpUpload, collaboratorController.CreateBlog);
-router.put("/update-blog", collaboratorController.UpdateBlog);
+router.put("/update-blog",cpUpload, collaboratorController.UpdateBlog);
 router.delete("/delete-blog", collaboratorController.DeleteBlog);
 router.post("/create-recipe", collaboratorController.CreateRecipe);
 router.put("/update-recipe", collaboratorController.UpdateRecipe);

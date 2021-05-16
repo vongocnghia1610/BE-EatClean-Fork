@@ -6,6 +6,7 @@ const Recipe = require("../Models/Recipe");
 const BlogImage = require("../Models/BlogImage")
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const { UploadImage } = require("./index");
 const {
   createToken,
   verifyToken,
@@ -17,7 +18,7 @@ class CollaboratorController {
     try {
       const BlogTitle = req.body.BlogTitle;
       const BlogContent = req.body.BlogContent;
-      const blogImage = req.files["BlogImages"];
+      const Image = req.files["Image"];
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
@@ -29,10 +30,10 @@ class CollaboratorController {
           BlogContent,
           IDAuthor: userDb._doc._id,
         });
-        id_Blog= blog._doc._id;
-        for (let i=0;i<blogImage.length;i++)
+        const id_Blog= blog._doc._id;
+        for (let i=0;i<Image.length;i++)
         {
-          var addImage = req.files["BlogImage"][i];
+          var addImage = req.files["Image"][i];
           const urlImage = await UploadImage(addImage.filename, "BlogImages/");
           await BlogImage.create({
             BlogImages: urlImage,
@@ -63,28 +64,58 @@ class CollaboratorController {
 
   async UpdateBlog(req, res, next) {
     try {
-      const { BlogTitle, BlogContent } = req.body;
-      var update = {
-        BlogTitle,
-        BlogContent,
-      };
+      const BlogTitle = req.body.BlogTitle;
+      const BlogContent = req.body.BlogContent;
+      const Image = req.files["Image"];
       var _IDBlog = req.body.IDBlog;
+      var update = {
+        Status: "Deleted",
+      };
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var blog = await Blog.findOne({ _id: _IDBlog });
-      if (blog._doc.IDAuthor == userDb._doc._id) {
-        const blogUpdate = await Blog.findOneAndUpdate(
-          { _id: _IDBlog },
-          update,
+      if (blog._doc.IDAuthor == userDb._doc._id ) {
+        if(blog._doc.Status == "INCONFIRM")
+        {
+          await Blog.findOneAndUpdate(
+            { _id: _IDBlog },
+            update,
+            {
+              new: true,
+            }
+          );
+          const blogNew = await Blog.create({
+            BlogTitle,
+            BlogAuthor: userDb._doc.FullName,
+            BlogContent,
+            IDAuthor: userDb._doc._id,
+          });
+          const id_Blog= blogNew._doc._id;
+          for (let i=0;i<Image.length;i++)
           {
-            new: true,
+            var addImage = req.files["Image"][i];
+            const urlImage = await UploadImage(addImage.filename, "BlogImages/");
+            await BlogImage.create({
+              BlogImages: urlImage,
+              IDBlog: id_Blog,
+            });
           }
-        );
-        res.status(200).send({
-          data: blogUpdate,
-          error: "",
-        });
+          const showImage = await BlogImage.find({IDBlog: id_Blog})
+          res.status(200).send({
+            data: blogNew,
+            Image: showImage,
+            error: "",
+          });
+        }
+        else
+        {
+          res.status(400).send({
+            data: "",
+            error: "Blog Confirmed",
+          });
+        }
+       
       } else {
         res.status(400).send({
           data: "",
@@ -92,6 +123,7 @@ class CollaboratorController {
         });
       }
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         data: error,
         error: "Internal Server Error",
