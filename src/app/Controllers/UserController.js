@@ -3,6 +3,7 @@ const User = require("../Models/User");
 const Role = require("../Models/Role");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+
 const { UploadImage } = require("./index");
 const {
   createToken,
@@ -14,27 +15,21 @@ class UserController {
   //Post user/register-user
   async RegisterUser(req, res, next) {
     try {
-     
+      const Username = req.body.Username;
       const Email = req.body.Email;
       const Password = req.body.Password;
-      const Phone = req.body.Phone;
       const FullName = req.body.FullName;
-      const Gender = req.body.Gender;
       const Image = req.files["Image"][0];
-      const LoginFB = req.body.LoginFB;
       const urlImage = await UploadImage(Image.filename, "Avatars/");
-
-      const result = await User.findOne({ Email });
+      const result = await User.findOne({ Username });
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
         const user = await User.create({
+          Username,
           Email,
           Password: hashPassword,
-          Phone,
           FullName,
-          Gender,
           Image : urlImage,
-          LoginFB,
         });
         var id_account = user._doc._id;
         const token = await createTokenTime(`${id_account}`);
@@ -84,26 +79,22 @@ class UserController {
   //Post user/register-user
   async RegisterCollaborator(req, res, next) {
     try {
+      const Username = req.body.Username;
       const Email = req.body.Email;
       const Password = req.body.Password;
-      const Phone = req.body.Phone;
       const FullName = req.body.FullName;
-      const Gender = req.body.Gender;
       const Image = req.files["Image"][0];
-      const LoginFB = req.body.LoginFB;
       const urlImage = await UploadImage(Image.filename, "Avatars/");
 
-      const result = await User.findOne({ Email });
+      const result = await User.findOne({ Username });
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
         const user = await User.create({
+          Username,
           Email,
           Password: hashPassword,
-          Phone,
           FullName,
-          Gender,
           Image: urlImage,
-          LoginFB,
           IDRole: "609d2d03fee09d75f011158c",
         });
         var id_account = user._doc._id;

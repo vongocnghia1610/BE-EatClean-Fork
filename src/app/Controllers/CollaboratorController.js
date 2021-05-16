@@ -3,6 +3,7 @@ const User = require("../Models/User");
 const Role = require("../Models/Role");
 const Blog = require("../Models/Blog");
 const Recipe = require("../Models/Recipe");
+const BlogImage = require("../Models/BlogImage")
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const {
@@ -12,16 +13,15 @@ const {
   makePassword,
 } = require("./index");
 class CollaboratorController {
-  // Post collaborator/create-blog
   async CreateBlog(req, res, next) {
     try {
-      const { BlogTitle, BlogAuthor, BlogContent, IDAuthor } = req.body;
+      const BlogTitle = req.body.BlogTitle;
+      const BlogContent = req.body.BlogContent;
+      const blogImage = req.files["BlogImages"];
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
-      console.log(userDb._doc.IDRole);
       var role = await Role.findOne({ _id: userDb._doc.IDRole });
-      console.log(role._doc.RoleName);
       if (role._doc.RoleName == "Collaborator") {
         const blog = await Blog.create({
           BlogTitle,
@@ -29,8 +29,20 @@ class CollaboratorController {
           BlogContent,
           IDAuthor: userDb._doc._id,
         });
+        id_Blog= blog._doc._id;
+        for (let i=0;i<blogImage.length;i++)
+        {
+          var addImage = req.files["BlogImage"][i];
+          const urlImage = await UploadImage(addImage.filename, "BlogImages/");
+          await BlogImage.create({
+            BlogImages: urlImage,
+            IDBlog: id_Blog,
+          });
+        }
+        const showImage = await BlogImage.find({IDBlog: id_Blog})
         res.status(200).send({
           data: blog,
+          Image: showImage,
           error: "",
         });
       } else {
@@ -40,6 +52,7 @@ class CollaboratorController {
         });
       }
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         data: error,
         error: "Internal Server Error",

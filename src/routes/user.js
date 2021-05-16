@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage: storage });
-var cpUpload = upload.fields([{ name: 'Image', maxCount: 1 }]);
+var cpUpload = upload.fields([{ name: 'Image', maxCount: 100 }]);
 
 router.post("/register-user",cpUpload, userController.RegisterUser);
 router.post("/register-collaborator",cpUpload, userController.RegisterCollaborator);
