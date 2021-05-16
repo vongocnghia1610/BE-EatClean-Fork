@@ -172,8 +172,8 @@ class UserController {
   //Post user/login
   async login(req, res, next) {
     try {
-      const { Email, Password } = req.body;
-      var result = await User.findOne({ Email, Status: "ACTIVE" });
+      const { Username, Password } = req.body;
+      var result = await User.findOne({ Username, Status: "ACTIVE" });
       if (result != null) {
         const isEqualPassword = await bcrypt.compare(Password, result.Password);
         if (isEqualPassword) {
