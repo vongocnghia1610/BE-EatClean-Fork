@@ -3,8 +3,8 @@ const Schema = mongoose.Schema;
 
 const RecipeImage = new Schema(
   {
-    RecipesImages: { type: String, required: true },
-    IDRecipes: { type: String, required: true },
+    RecipeImages: { type: String, required: true },
+    IDRecipe: { type: String, required: true },
   },
   {
     timestamps: true,

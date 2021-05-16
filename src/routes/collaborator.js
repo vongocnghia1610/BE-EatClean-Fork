@@ -16,8 +16,8 @@ var cpUpload = upload.fields([{ name: 'Image', maxCount: 100 }]);
 router.post("/create-blog",cpUpload, collaboratorController.CreateBlog);
 router.put("/update-blog",cpUpload, collaboratorController.UpdateBlog);
 router.delete("/delete-blog", collaboratorController.DeleteBlog);
-router.post("/create-recipe", collaboratorController.CreateRecipe);
-router.put("/update-recipe", collaboratorController.UpdateRecipe);
+router.post("/create-recipe",cpUpload, collaboratorController.CreateRecipe);
+router.put("/update-recipe",cpUpload, collaboratorController.UpdateRecipe);
 router.delete("/delete-recipe", collaboratorController.DeleteRecipe);
 
 module.exports = router;

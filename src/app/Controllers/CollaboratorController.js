@@ -3,7 +3,8 @@ const User = require("../Models/User");
 const Role = require("../Models/Role");
 const Blog = require("../Models/Blog");
 const Recipe = require("../Models/Recipe");
-const BlogImage = require("../Models/BlogImage")
+const BlogImage = require("../Models/BlogImage");
+const RecipeImage = require("../Models/RecipeImage");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { UploadImage } = require("./index");
@@ -172,29 +173,40 @@ class CollaboratorController {
   // Post collaborator/create-recipe
   async CreateRecipe(req, res, next) {
     try {
-      const {
-        RecipesTitle,
-        RecipesContent,
-        NutritionalIngredients,
-        Ingredients,
-        Steps,
-      } = req.body;
+      const RecipesTitle = req.body.RecipesTitle;
+      const RecipesContent = req.body.RecipesContent;
+      const NutritionalIngredients = req.body.NutritionalIngredients;
+      const Ingredients = req.body.Ingredients;
+      const Steps = req.body.Steps;
+      const Image = req.files["Image"];
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var role = await Role.findOne({ _id: userDb._doc.IDRole });
       if (role._doc.RoleName == "Collaborator") {
         const recipe = await Recipe.create({
-          RecipesTitle,
-          RecipesContent,
-          RecipesAuthor: userDb._doc.FullName,
-          NutritionalIngredients,
-          Ingredients,
-          Steps,
-          IDAuthor: userDb._doc._id,
-        });
+                RecipesTitle,
+                RecipesContent,
+                RecipesAuthor: userDb._doc.FullName,
+                NutritionalIngredients,
+                Ingredients,
+                Steps,
+                IDAuthor: userDb._doc._id,
+              });
+        const id_Recipe= recipe._doc._id;
+        for (let i=0;i<Image.length;i++)
+        {
+          var addImage = req.files["Image"][i];
+          const urlImage = await UploadImage(addImage.filename, "RecipeImages/");
+          await RecipeImage.create({
+            RecipeImages: urlImage,
+            IDRecipe: id_Recipe,
+          });
+        }
+        const showImage = await RecipeImage.find({IDRecipe: id_Recipe})
         res.status(200).send({
           data: recipe,
+          Image: showImage,
           error: "",
         });
       } else {
@@ -204,6 +216,7 @@ class CollaboratorController {
         });
       }
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         data: error,
         error: "Internal Server Error",
@@ -215,37 +228,64 @@ class CollaboratorController {
 
   async UpdateRecipe(req, res, next) {
     try {
-      const {
-        RecipesTitle,
-        RecipesContent,
-        NutritionalIngredients,
-        Ingredients,
-        Steps,
-      } = req.body;
-      var update = {
-        RecipesTitle,
-        RecipesContent,
-        NutritionalIngredients,
-        Ingredients,
-        Steps,
-      };
+      const RecipesTitle = req.body.RecipesTitle;
+      const RecipesContent = req.body.RecipesContent;
+      const NutritionalIngredients = req.body.NutritionalIngredients;
+      const Ingredients = req.body.Ingredients;
+      const Steps = req.body.Steps;
+      const Image = req.files["Image"];
       var _IDRecipe = req.body.IDRecipe;
+      var update = {
+        Status: "Deleted",
+      };
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var recipe = await Recipe.findOne({ _id: _IDRecipe });
-      if (recipe._doc.IDAuthor == userDb._doc._id) {
-        const recipeUpdate = await Recipe.findOneAndUpdate(
-          { _id: _IDRecipe },
-          update,
+      if (recipe._doc.IDAuthor == userDb._doc._id ) {
+        if(recipe._doc.Status == "INCONFIRM")
+        {
+          await Recipe.findOneAndUpdate(
+            { _id:  _IDRecipe},
+            update,
+            {
+              new: true,
+            }
+          );
+          const recipeNew = await Recipe.create({
+            RecipesTitle,
+            RecipesContent,
+            RecipesAuthor: userDb._doc.FullName,
+            NutritionalIngredients,
+            Ingredients,
+            Steps,
+            IDAuthor: userDb._doc._id,
+          });
+          const id_Recipe= recipeNew._doc._id;
+          for (let i=0;i<Image.length;i++)
           {
-            new: true,
+            var addImage = req.files["Image"][i];
+            const urlImage = await UploadImage(addImage.filename, "RecipeImages/");
+            await RecipeImage.create({
+              RecipeImages: urlImage,
+              IDRecipe: id_Recipe,
+            });
           }
-        );
-        res.status(200).send({
-          data: recipeUpdate,
-          error: "",
-        });
+          const showImage = await RecipeImage.find({IDRecipe: id_Recipe})
+          res.status(200).send({
+            data: recipeNew,
+            Image: showImage,
+            error: "",
+          });
+        }
+        else
+        {
+          res.status(400).send({
+            data: "",
+            error: "Recipe Confirmed",
+          });
+        }
+       
       } else {
         res.status(400).send({
           data: "",
@@ -253,6 +293,7 @@ class CollaboratorController {
         });
       }
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         data: error,
         error: "Internal Server Error",
