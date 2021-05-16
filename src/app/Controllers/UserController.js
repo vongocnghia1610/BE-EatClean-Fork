@@ -161,6 +161,7 @@ class UserController {
       res.status(400).send("Token hết hạn!");
     }
   }
+
   //Post user/login
   async login(req, res, next) {
     try {
@@ -192,5 +193,6 @@ class UserController {
       });
     }
   }
+ 
 }
 module.exports = new UserController();
