@@ -8,4 +8,8 @@ router.post("/favorite-blog", meController.FavortiteBlog);
 router.post("/favorite-recipe", meController.FavortiteRecipe);
 router.get("/show-blog", meController.ShowBlog);
 router.get("/show-recipe", meController.ShowRecipe);
+router.post("/create-comment", meController.CreateComment);
+router.put("/edit-comment", meController.EditComment);
+router.delete("/delete-comment", meController.DeleteComment);
+
 module.exports = router;
