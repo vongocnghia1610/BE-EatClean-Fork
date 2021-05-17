@@ -42,6 +42,45 @@ class MeController {
       });
     }
   }
+   //Put me/change-password
+   async ChangePassword(req, res, next) {
+    try {
+      const passwordOld = req.body.PasswordOld;
+      const passwordNew = req.body.PasswordNew;
+      const confirmPassword = req.body.ConfirmPassword;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      var result = await User.findOne({ _id, Status: "ACTIVE" });
+      if (result != null) {
+        const isEqualPassword = await bcrypt.compare(
+          passwordOld,
+          result.Password
+        );
+        if (isEqualPassword) {
+          if (passwordNew == confirmPassword) {
+            const hashPassword = await bcrypt.hash(passwordNew, 5);
+            result.Password = hashPassword;
+            result.save();
+            res.status(200).send({
+              Success: "Change Password Success",
+            });
+          } else {
+            res.status(400).send({
+              error: "New password is not same same password confirm",
+            });
+          }
+        } else {
+          res.status(400).send({
+            error: " Wrong Old Password ",
+          });
+        }
+      }
+    } catch (error) {
+      res.status(500).send({
+        error: error,
+      });
+    }
+  }
   //Post me/favorite-blog
   async FavortiteBlog(req, res, next) {
     try {

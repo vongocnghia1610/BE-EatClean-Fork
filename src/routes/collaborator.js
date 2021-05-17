@@ -19,5 +19,7 @@ router.delete("/delete-blog", collaboratorController.DeleteBlog);
 router.post("/create-recipe",cpUpload, collaboratorController.CreateRecipe);
 router.put("/update-recipe",cpUpload, collaboratorController.UpdateRecipe);
 router.delete("/delete-recipe", collaboratorController.DeleteRecipe);
+router.post("/register-collaborator",cpUpload, collaboratorController.RegisterCollaborator);
+
 
 module.exports = router;

@@ -15,7 +15,6 @@ const upload = multer({ storage: storage });
 var cpUpload = upload.fields([{ name: 'Image', maxCount: 100 }]);
 
 router.post("/register-user",cpUpload, userController.RegisterUser);
-router.post("/register-collaborator",cpUpload, userController.RegisterCollaborator);
 router.post("/login", userController.login);
 router.get("/verify-email/:token", userController.verifyEmail);
 

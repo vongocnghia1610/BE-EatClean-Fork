@@ -11,5 +11,6 @@ router.get("/show-recipe", meController.ShowRecipe);
 router.post("/create-comment", meController.CreateComment);
 router.put("/edit-comment", meController.EditComment);
 router.delete("/delete-comment", meController.DeleteComment);
+router.put("/change-password", meController.ChangePassword);
 
 module.exports = router;

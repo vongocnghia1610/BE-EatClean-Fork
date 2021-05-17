@@ -15,6 +15,68 @@ const {
   makePassword,
 } = require("./index");
 class CollaboratorController {
+  //Post collaborator/register-user
+  async RegisterCollaborator(req, res, next) {
+    try {
+      const Username = req.body.Username;
+      const Email = req.body.Email;
+      const Password = req.body.Password;
+      const FullName = req.body.FullName;
+      const result = await User.findOne({$or:[{ Username },{Email}]});
+      if (result == null) {
+        const hashPassword = await bcrypt.hash(Password, 5);
+        const user = await User.create({
+          Username,
+          Email,
+          Password: hashPassword,
+          FullName,
+          IDRole: "609d2d03fee09d75f011158c",
+        });
+        var id_account = user._doc._id;
+        const token = await createTokenTime(`${id_account}`);
+        var smtpTransport = nodemailer.createTransport({
+          service: "gmail", //smtp.gmail.com  //in place of service use host...
+          secure: false, //true
+          port: 25, //465
+          auth: {
+            user: process.env.EmailAdmin,
+            pass: process.env.PasswordAdmin,
+          },
+          tls: {
+            rejectUnauthorized: false,
+          },
+        });
+        var url = `http://${req.headers.host}/user/verify-email/${token}`;
+        var mailOptions = {
+          to: user._doc.Email,
+          from: process.env.EmailAdmin,
+          subject: "Verify Email",
+          text: "Please follow this link to verify Email " + url,
+        };
+        smtpTransport.sendMail(mailOptions, function (error, response) {
+          if (error) {
+            res.status(400).send({
+              error: "Gửi không thành công",
+            });
+          } else {
+            res.status(200).send({
+              data: user,
+              Success: "Đã gửi Email thành công",
+            });
+          }
+        });
+      } else {
+        res.status(400).send({
+          error: "Tài khoản hoặc Email đã tồn tại",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(400).send({
+        error: "Dang ky that bai",
+      });
+    }
+  }
   async CreateBlog(req, res, next) {
     try {
       const BlogTitle = req.body.BlogTitle;
