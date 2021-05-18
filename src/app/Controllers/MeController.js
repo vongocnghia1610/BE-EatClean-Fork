@@ -151,6 +151,7 @@ class MeController {
         error: "",
       });
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         data: "",
         error: error,
@@ -206,7 +207,6 @@ class MeController {
       });
     }
   }
-
    // Put edit-comment
    async EditComment(req, res, next) {
     try {

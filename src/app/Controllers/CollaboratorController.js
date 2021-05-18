@@ -87,22 +87,36 @@ class CollaboratorController {
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var role = await Role.findOne({ _id: userDb._doc.IDRole });
       if (role._doc.RoleName == "Collaborator") {
-        const blog = await Blog.create({
+        var blog = await Blog.create({
           BlogTitle,
           BlogAuthor: userDb._doc.FullName,
           BlogContent,
           IDAuthor: userDb._doc._id,
         });
+        var urlImageMain;
         const id_Blog= blog._doc._id;
         for (let i=0;i<Image.length;i++)
         {
           var addImage = req.files["Image"][i];
           const urlImage = await UploadImage(addImage.filename, "BlogImages/");
+          if(i==0)
+          {
+            urlImageMain =urlImage; 
+          }
           await BlogImage.create({
             BlogImages: urlImage,
             IDBlog: id_Blog,
           });
         }
+        blog = await Blog.findOneAndUpdate(
+          { _id: id_Blog },
+          {
+            ImageMain: urlImageMain,
+          },
+          {
+            new: true,
+          }
+        );
         const showImage = await BlogImage.find({IDBlog: id_Blog})
         res.status(200).send({
           data: blog,
@@ -245,8 +259,9 @@ class CollaboratorController {
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      var urlImageMain ;
       if (role._doc.RoleName == "Collaborator") {
-        const recipe = await Recipe.create({
+        var recipe = await Recipe.create({
                 RecipesTitle,
                 RecipesContent,
                 RecipesAuthor: userDb._doc.FullName,
@@ -260,12 +275,25 @@ class CollaboratorController {
         {
           var addImage = req.files["Image"][i];
           const urlImage = await UploadImage(addImage.filename, "RecipeImages/");
+          if(i==0)
+          {
+            urlImageMain = urlImage;
+          }
           await RecipeImage.create({
             RecipeImages: urlImage,
             IDRecipe: id_Recipe,
           });
         }
-        const showImage = await RecipeImage.find({IDRecipe: id_Recipe})
+        recipe = await Recipe.findOneAndUpdate(
+          { _id: id_Recipe },
+          {
+            ImageMain: urlImageMain,
+          },
+          {
+            new: true,
+          }
+        );
+        var showImage = await RecipeImage.find({IDRecipe: id_Recipe})
         res.status(200).send({
           data: recipe,
           Image: showImage,

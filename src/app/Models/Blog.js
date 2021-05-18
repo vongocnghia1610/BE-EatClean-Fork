@@ -7,6 +7,7 @@ const Blog = new Schema(
     BlogAuthor: { type: String, required: true },
     BlogContent: { type: String, required: true },
     IDAuthor: {type: String, required: true},
+    ImageMain: {type: String, default: null},
     Status: {type: String, default: "INCONFIRM"},
   },
   {
