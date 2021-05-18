@@ -17,6 +17,8 @@ var cpUpload = upload.fields([{ name: 'Image', maxCount: 100 }]);
 router.post("/register-user",cpUpload, userController.RegisterUser);
 router.post("/login", userController.login);
 router.get("/verify-email/:token", userController.verifyEmail);
+router.get("/show-blog-detail/", userController.ShowBlogDetail);
+router.get("/show-recipe-detail/", userController.ShowRecipeDetail);
 
 
 module.exports = router;

@@ -1,6 +1,10 @@
 require("dotenv").config();
 const User = require("../Models/User");
 const Role = require("../Models/Role");
+const Blog = require("../Models/Blog");
+const Recipe = require("../Models/Recipe");
+const BlogImage = require("../Models/BlogImage");
+const RecipeImage = require("../Models/RecipeImage");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { UploadImage } = require("./index");
@@ -18,7 +22,7 @@ class UserController {
       const Email = req.body.Email;
       const Password = req.body.Password;
       const FullName = req.body.FullName;
-      const result = await User.findOne({$or:[{ Username },{Email}]});
+      const result = await User.findOne({ $or: [{ Username }, { Email }] });
       console.log(result);
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
@@ -73,7 +77,7 @@ class UserController {
       });
     }
   }
-  
+
   //get customers/verify-Emaillll
   async verifyEmail(req, res, next) {
     try {
@@ -133,6 +137,79 @@ class UserController {
       });
     }
   }
- 
+  // Get /user/show-blog-detail
+  async ShowBlogDetail(req, res, next) {
+    try {
+      var _IDBlog = req.query.id;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName != null) {
+        var listBlog = await Blog.find({ Status: "CONFIRM", _id: _IDBlog });
+        if (listBlog.length != 0) {
+          var imageBlog = await BlogImage.find({ IDBlog: _IDBlog });
+          res.status(200).send({
+            data: listBlog,
+            image: imageBlog,
+            error: "",
+          });
+        }
+        else
+        {
+          res.status(404).send({
+            error: "Blog không tồn tại",
+          });
+        }
+      } else {
+        res.status(404).send({
+          error: "Vui lòng đăng nhập để xem chi tiết",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: "Vui lòng đăng nhập để xem chi tiết",
+      });
+    }
+  }
+  // Get /user/show-recipe-detail
+  async ShowRecipeDetail(req, res, next) {
+    try {
+      var _IDRecipe = req.query.id;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName != null) {
+        var listRecipe = await Recipe.find({ Status: "CONFIRM", _id: _IDRecipe });
+        if (listRecipe.length != 0) {
+          var imageRecipe = await RecipeImage.find({ IDRecipe: _IDRecipe });
+          res.status(200).send({
+            data: listRecipe,
+            image: imageRecipe,
+            error: "",
+          });
+        }
+        else
+        {
+          res.status(404).send({
+            error: "Recipe không tồn tại",
+          });
+        }
+      } else {
+        res.status(404).send({
+          error: "Vui lòng đăng nhập để xem chi tiết",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: "Vui lòng đăng nhập để xem chi tiết",
+      });
+    }
+  }
 }
 module.exports = new UserController();
