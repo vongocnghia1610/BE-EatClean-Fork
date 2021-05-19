@@ -8,6 +8,7 @@ const RecipeImage = require("../Models/RecipeImage");
 const FavoriteBlog = require("../Models/FavoriteBlog");
 const FavoriteRecipe = require("../Models/FavoriteRecipe");
 
+const serviceAccount = require("../../../serviceAccountKey.json");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const {
@@ -17,9 +18,8 @@ const {
   makePassword,
 } = require("./index");
 class MeController {
-
-  // Get /admin/show-blog
-  async ShowBlog(req, res, next) {
+  // Get /admin/show-blog-inconfirm
+  async ShowBlogInconfirm(req, res, next) {
     try {
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
@@ -44,8 +44,8 @@ class MeController {
       });
     }
   }
-  // Get /me/show-recipe
-  async ShowRecipe(req, res, next) {
+  // Get /me/show-recipe-inconfirm
+  async ShowRecipeInconfirm(req, res, next) {
     try {
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
@@ -236,6 +236,219 @@ class MeController {
             error: "No Authentication",
           });
         }
+      } else {
+        res.status(404).send({
+          data: "",
+          error: "Not found user!",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
+
+  // Delete admin/delete-blog
+  async DeleteBlog(req, res, next) {
+    try {
+      var _IDBlog = req.query.id;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role.RoleName == "Admin") {
+        var imageBlog = await BlogImage.find({ IDBlog: _IDBlog });
+        for (let i = 0; i < imageBlog.length; i++) {
+          await BlogImage.deleteOne({ IDBlog: _IDBlog });
+        }
+        await Blog.deleteOne({ _id: _IDBlog });
+        res.status(200).send({
+          data: "Xóa thành công",
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
+  // Delete admin/delete-recipe
+  async DeleteRecipe(req, res, next) {
+    try {
+      var _IDRecipe = req.query.id;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role.RoleName == "Admin") {
+        var imageRecipe = await RecipeImage.find({ IDRecipe: _IDRecipe });
+        for (let i = 0; i < imageRecipe.length; i++) {
+          await RecipeImage.deleteOne({ IDRecipe: _IDRecipe });
+        }
+        await Recipe.deleteOne({ _id: _IDRecipe });
+        res.status(200).send({
+          data: "Xóa thành công",
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
+  // Get /admin/show-blog-delete
+  async ShowBlogDelete(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName == "Admin") {
+        var listBlog = await Blog.find({ Status: "Deleted" });
+        res.status(200).send({
+          data: listBlog,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
+  // Get /me/show-recipe-delete
+  async ShowRecipeDelete(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName == "Admin") {
+        var listRecipe = await Recipe.find({ Status: "Deleted" });
+        res.status(200).send({
+          data: listRecipe,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
+
+  // Get admin/show-users
+  async ShowUser(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName == "Admin") {
+        var listUser = await User.find({ IDRole: "609d2ceafee09d75f011158b" });
+        res.status(200).send({
+          data: listUser,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
+  //Get admin/show-collaborator
+  async ShowCollaborator(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName == "Admin") {
+        var listUser = await User.find({ IDRole: "609d2d03fee09d75f011158c" });
+        res.status(200).send({
+          data: listUser,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
+
+  //put admin/edit-information-user
+  async EditInformationUserAll(req, res, next) {
+    try {
+      var idUser = req.query.id;
+      const {
+        FullName,
+        Status
+      } = req.body;
+      var update = {
+        FullName,
+        Status
+      }
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
+      var role = await Role.findOne({ _id: resultUser._doc.IDRole });
+      if (role._doc.RoleName == "Admin") {
+        resultUser = await User.findOneAndUpdate(
+          {_id: idUser},
+          update,
+          {
+            new: true,
+          }
+        );
+        res.status(200).send({
+          data: resultUser,
+          error: "null",
+        });
       } else {
         res.status(404).send({
           data: "",

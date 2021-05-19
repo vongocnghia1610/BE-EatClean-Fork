@@ -16,10 +16,11 @@ const {
   verifyToken,
   createTokenTime,
   makePassword,
+  UploadImage
 } = require("./index");
 class MeController {
   //get me/information / get || post put delete
-  async information(req, res, next) {
+  async Information(req, res, next) {
     try {
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
@@ -42,8 +43,8 @@ class MeController {
       });
     }
   }
-   //Put me/change-password
-   async ChangePassword(req, res, next) {
+  //Put me/change-password
+  async ChangePassword(req, res, next) {
     try {
       const passwordOld = req.body.PasswordOld;
       const passwordNew = req.body.PasswordNew;
@@ -207,22 +208,22 @@ class MeController {
       });
     }
   }
-   // Put edit-comment
-   async EditComment(req, res, next) {
+  // Put edit-comment
+  async EditComment(req, res, next) {
     try {
       const comment = req.body.Comment;
       const stars = req.body.Stars;
       const idComment = req.body.IDComment;
       const token = req.get("Authorization").replace("Bearer ", "");
-      const _Comment = await Comment.findOne({_id: idComment});
+      const _Comment = await Comment.findOne({ _id: idComment });
       const _id = await verifyToken(token);
       if (_id == _Comment._doc.IDUser) {
         var update = {
           Comment: comment,
           Stars: stars,
-        }
-        var commentRecipe =await Comment.findOneAndUpdate(
-          { _id:  idComment},
+        };
+        var commentRecipe = await Comment.findOneAndUpdate(
+          { _id: idComment },
           update,
           {
             new: true,
@@ -247,42 +248,100 @@ class MeController {
     }
   }
 
-     // Delete delete-comment
-     async DeleteComment(req, res, next) {
-      try {
-        var update = {
-          Status: "Deleted",
-        };
-        var _IDComment = req.query.id;
-        const token = req.get("Authorization").replace("Bearer ", "");
-        const _id = await verifyToken(token);
-        const userDb = await User.findOne({ _id, Status: "ACTIVE" });
-        var comment = await Comment.findOne({ _id: _IDComment });
-        if (comment._doc.IDUser == userDb._doc._id) {
-          const commentUpdate = await Comment.findOneAndUpdate(
-            { _id: _IDComment },
-            update,
+  // Delete delete-comment
+  async DeleteComment(req, res, next) {
+    try {
+      var update = {
+        Status: "Deleted",
+      };
+      var _IDComment = req.query.id;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var comment = await Comment.findOne({ _id: _IDComment });
+      if (comment._doc.IDUser == userDb._doc._id) {
+        const commentUpdate = await Comment.findOneAndUpdate(
+          { _id: _IDComment },
+          update,
+          {
+            new: true,
+          }
+        );
+        res.status(200).send({
+          data: commentUpdate,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
+
+  //put me/edit-information
+  async EditInformation(req, res, next) {
+    try {
+      var FullName = req.body.FullName;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
+      if (resultUser != null) {
+        if(req.files["Image"] != null)
+        {
+          var addImage = req.files["Image"][0];
+          const urlImage = await UploadImage(addImage.filename, "Avatars/");
+          resultUser = await User.findOneAndUpdate(
+            { _id, Status: "ACTIVE" },
+            {
+              FullName,
+              Image: urlImage,
+            },
             {
               new: true,
             }
           );
           res.status(200).send({
-            data: commentUpdate,
-            error: "",
-          });
-        } else {
-          res.status(400).send({
-            data: "",
-            error: "No Autheraziton",
+            data: resultUser,
+            error: "null",
           });
         }
-      } catch (error) {
-        console.log(error);
-        res.status(500).send({
-          data: error,
-          error: "Internal Server Error",
+        else
+        {
+          resultUser = await User.findOneAndUpdate(
+            { _id, Status: "ACTIVE" },
+            {
+              FullName,
+            },
+            {
+              new: true,
+            }
+          );
+          res.status(200).send({
+            data: resultUser,
+            error: "null",
+          });
+        }
+      } else {
+        res.status(404).send({
+          data: "",
+          error: "Not found user!",
         });
       }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
     }
+  }
 }
 module.exports = new MeController();
