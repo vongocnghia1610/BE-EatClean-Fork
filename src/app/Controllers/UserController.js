@@ -33,7 +33,7 @@ class UserController {
           FullName,
         });
         var id_account = user._doc._id;
-        const token = await createTokenTime(`${id_account}`);
+        const token = await createToken(`${id_account}`);
         var smtpTransport = nodemailer.createTransport({
           service: "gmail", //smtp.gmail.com  //in place of service use host...
           secure: false, //true
