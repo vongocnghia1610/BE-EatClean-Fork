@@ -114,6 +114,7 @@ class UserController {
     try {
       const { Username, Password } = req.body;
       var result = await User.findOne({ Username, Status: "ACTIVE" });
+      console.log(req.body);
       if (result != null) {
         const isEqualPassword = await bcrypt.compare(Password, result.Password);
         if (isEqualPassword) {

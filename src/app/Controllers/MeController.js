@@ -16,7 +16,7 @@ const {
   verifyToken,
   createTokenTime,
   makePassword,
-  UploadImage
+  UploadImage,
 } = require("./index");
 class MeController {
   //get me/information / get || post put delete
@@ -286,48 +286,93 @@ class MeController {
     }
   }
 
-  //put me/edit-information
-  async EditInformation(req, res, next) {
+  //put me/edit-informationAnh
+  async EditInformationAnh(req, res, next) {
     try {
       var FullName = req.body.FullName;
+      var Email = req.body.Email;
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
       if (resultUser != null) {
-        if(req.files["Image"] != null)
-        {
-          var addImage = req.files["Image"][0];
-          const urlImage = await UploadImage(addImage.filename, "Avatars/");
-          resultUser = await User.findOneAndUpdate(
-            { _id, Status: "ACTIVE" },
-            {
-              FullName,
-              Image: urlImage,
-            },
-            {
-              new: true,
+        if (resultUser.Email == Email) {
+          if (req.files["Image"] != null) {
+            var addImage = req.files["Image"][0];
+            const urlImage = await UploadImage(addImage.filename, "Avatars/");
+            resultUser = await User.findOneAndUpdate(
+              { _id, Status: "ACTIVE" },
+              {
+                FullName,
+                Image: urlImage,
+              },
+              {
+                new: true,
+              }
+            );
+            res.status(200).send({
+              data: resultUser,
+              error: "null",
+            });
+          } else {
+            resultUser = await User.findOneAndUpdate(
+              { _id, Status: "ACTIVE" },
+              {
+                FullName,
+              },
+              {
+                new: true,
+              }
+            );
+            res.status(200).send({
+              data: resultUser,
+              error: "null",
+            });
+          }
+        } else {
+          var resultUpdate = await User.find({ Email}); //muc dich la lay role
+          if (resultUpdate.length > 0) {
+            res.status(400).send({
+              data: "null",
+              error: "Email đã tồn tại",
+            });
+          }
+          else
+          {
+            if (req.files["Image"] != null) {
+              var addImage = req.files["Image"][0];
+              const urlImage = await UploadImage(addImage.filename, "Avatars/");
+              resultUser = await User.findOneAndUpdate(
+                { _id, Status: "ACTIVE" },
+                {
+                  FullName,
+                  Email,
+                  Image: urlImage,
+                },
+                {
+                  new: true,
+                }
+              );
+              res.status(200).send({
+                data: resultUser,
+                error: "null",
+              });
+            } else {
+              resultUser = await User.findOneAndUpdate(
+                { _id, Status: "ACTIVE" },
+                {
+                  FullName,
+                  Email,
+                },
+                {
+                  new: true,
+                }
+              );
+              res.status(200).send({
+                data: resultUser,
+                error: "null",
+              });
             }
-          );
-          res.status(200).send({
-            data: resultUser,
-            error: "null",
-          });
-        }
-        else
-        {
-          resultUser = await User.findOneAndUpdate(
-            { _id, Status: "ACTIVE" },
-            {
-              FullName,
-            },
-            {
-              new: true,
-            }
-          );
-          res.status(200).send({
-            data: resultUser,
-            error: "null",
-          });
+          }
         }
       } else {
         res.status(404).send({
