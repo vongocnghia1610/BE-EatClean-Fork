@@ -34,6 +34,7 @@ class UserController {
         });
         var id_account = user._doc._id;
         const token = await createToken(`${id_account}`);
+        console.log(token);
         var smtpTransport = nodemailer.createTransport({
           service: "gmail", //smtp.gmail.com  //in place of service use host...
           secure: false, //true
@@ -55,6 +56,7 @@ class UserController {
         };
         smtpTransport.sendMail(mailOptions, function (error, response) {
           if (error) {
+            console.log(error);
             res.status(400).send({
               error: "Gửi không thành công",
             });
@@ -83,7 +85,8 @@ class UserController {
     try {
       const token = req.params.token;
       const data = await verifyToken(token);
-      const _id = data.data;
+      console.log(data);
+      const _id = data;
       console.log(_id);
       var result = await User.findOne({ _id });
       if (result != null) {
