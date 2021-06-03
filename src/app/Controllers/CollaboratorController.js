@@ -23,6 +23,7 @@ class CollaboratorController {
       const Email = req.body.Email;
       const Password = req.body.Password;
       const FullName = req.body.FullName;
+      const SoDienThoai = req.body.SoDienThoai;
       const result = await User.findOne({$or:[{ Username },{Email}]});
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
@@ -31,6 +32,7 @@ class CollaboratorController {
           Email,
           Password: hashPassword,
           FullName,
+          SoDienThoai,
           IDRole: "609d2d03fee09d75f011158c",
         });
         var id_account = user._doc._id;

@@ -22,8 +22,8 @@ class UserController {
       const Email = req.body.Email;
       const Password = req.body.Password;
       const FullName = req.body.FullName;
+      const SoDienThoai = req.body.SoDienThoai;
       const result = await User.findOne({ $or: [{ Username }, { Email }] });
-      console.log(result);
       if (result == null) {
         const hashPassword = await bcrypt.hash(Password, 5);
         const user = await User.create({
@@ -31,6 +31,7 @@ class UserController {
           Email,
           Password: hashPassword,
           FullName,
+          SoDienThoai
         });
         var id_account = user._doc._id;
         const token = await createToken(`${id_account}`);

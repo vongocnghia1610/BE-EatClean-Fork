@@ -7,9 +7,7 @@ const BlogImage = require("../Models/BlogImage");
 const RecipeImage = require("../Models/RecipeImage");
 const FavoriteBlog = require("../Models/FavoriteBlog");
 const FavoriteRecipe = require("../Models/FavoriteRecipe");
-
 const serviceAccount = require("../../../serviceAccountKey.json");
-const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const {
   createToken,

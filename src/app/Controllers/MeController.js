@@ -8,7 +8,8 @@ const RecipeImage = require("../Models/RecipeImage");
 const FavoriteBlog = require("../Models/FavoriteBlog");
 const FavoriteRecipe = require("../Models/FavoriteRecipe");
 const Comment = require("../Models/Comment");
-
+const twilio = require("twilio");
+const client = twilio(process.env.accountSID, process.env.authToken);
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const {
@@ -291,6 +292,7 @@ class MeController {
     try {
       var FullName = req.body.FullName;
       var Email = req.body.Email;
+      var SoDienThoai = req.body.SoDienThoai;
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
@@ -303,6 +305,7 @@ class MeController {
               { _id, Status: "ACTIVE" },
               {
                 FullName,
+                SoDienThoai,
                 Image: urlImage,
               },
               {
@@ -318,6 +321,7 @@ class MeController {
               { _id, Status: "ACTIVE" },
               {
                 FullName,
+                SoDienThoai,
               },
               {
                 new: true,
@@ -347,6 +351,7 @@ class MeController {
                   FullName,
                   Email,
                   Image: urlImage,
+                  SoDienThoai,
                 },
                 {
                   new: true,
@@ -362,6 +367,7 @@ class MeController {
                 {
                   FullName,
                   Email,
+                  SoDienThoai,
                 },
                 {
                   new: true,
@@ -388,5 +394,56 @@ class MeController {
       });
     }
   }
+
+    //get me/send-password-sms
+    async SendPasswordSms(req, res, next) {
+      try {
+        var password = "123";
+        var soDienThoai = "0968356159";
+        var tachSoDienThoai = [];
+        var k=0;
+        for(let i=1;i<soDienThoai.length;i++)
+        {
+          tachSoDienThoai[k]=soDienThoai[i];
+          k++;
+        }
+        tachSoDienThoai.toString();
+        const token = req.get("Authorization").replace("Bearer ", "");
+        const _id = await verifyToken(token);
+        var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
+        if (resultUser != null) {
+
+          client.messages
+          .create({
+            body: 'Pass của bạn là:'+`${password}`,
+            from: process.env.Phone,
+            to: '+84'+`${tachSoDienThoai}` //replace this with your registered phone number
+          })
+          .then((data)=> {
+            res.status(200).send({
+              data: data,
+              error: "null",
+            });
+          })
+          .catch((error)=> {
+            res.status(400).send({
+              data: "null",
+              error: "Không gửi được qua SMS vì số điện thoại chưa được xác minh",
+            });
+          });
+        } else {
+          res.status(404).send({
+            data: "",
+            error: "Not found user!",
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({
+          data: "",
+          error: error,
+        });
+      }
+    }
 }
 module.exports = new MeController();
