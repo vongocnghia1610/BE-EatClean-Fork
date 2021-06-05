@@ -398,43 +398,47 @@ class MeController {
     //get me/send-password-sms
     async SendPasswordSms(req, res, next) {
       try {
-        var password = "123";
-        var soDienThoai = "0968356159";
-        var tachSoDienThoai = [];
-        var k=0;
-        for(let i=1;i<soDienThoai.length;i++)
+        var Username =req.query.Username;
+        var SoDienThoai = req.query.SoDienThoai;
+        var user = await User.findOne({ Username,SoDienThoai,Status: "ACTIVE" }); 
+        console.log(user);
+        if(user !=null)
         {
-          tachSoDienThoai[k]=soDienThoai[i];
-          k++;
+          var tachSoDienThoai = [];
+          var k=0;
+          for(let i=1;i<SoDienThoai.length;i++)
+          {
+            tachSoDienThoai[k]=SoDienThoai[i];
+            k++;
+          }
+          tachSoDienThoai.toString();
+          const token = await createTokenTime(`${user._id}`); 
+          var url = `http://${req.headers.host}/me/reset-password-sms/${token}`; 
+            client.messages
+            .create({
+              body: 'Nếu bạn muốn reset Password thì click vào link này thời gian link còn hiệu lực là 3 phút:'+`${url}`,
+              from: process.env.Phone,
+              to: '+84'+`${tachSoDienThoai}` //replace this with your registered phone number
+            })
+            .then((data)=> {
+              res.status(200).send({
+                data: data,
+                error: "null",
+              });
+            })
+            .catch((error)=> {
+              res.status(400).send({
+                data: "null",
+                error: "Không gửi được qua SMS vì số điện thoại chưa được xác minh",
+              });
+            });
+            console.log(url);
         }
-        tachSoDienThoai.toString();
-        const token = req.get("Authorization").replace("Bearer ", "");
-        const _id = await verifyToken(token);
-        var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
-        if (resultUser != null) {
-
-          client.messages
-          .create({
-            body: 'Pass của bạn là:'+`${password}`,
-            from: process.env.Phone,
-            to: '+84'+`${tachSoDienThoai}` //replace this with your registered phone number
-          })
-          .then((data)=> {
-            res.status(200).send({
-              data: data,
-              error: "null",
-            });
-          })
-          .catch((error)=> {
-            res.status(400).send({
-              data: "null",
-              error: "Không gửi được qua SMS vì số điện thoại chưa được xác minh",
-            });
-          });
-        } else {
-          res.status(404).send({
-            data: "",
-            error: "Not found user!",
+        else
+        {
+          res.status(400).send({
+            data: "null",
+            error: "Username hoặc Số điện thoại không trùng khớp",
           });
         }
       } catch (error) {
@@ -445,5 +449,60 @@ class MeController {
         });
       }
     }
+
+     //Post me/reset-password/:token
+  async ResetPassword(req, res, next) {
+    // const { Email, Password, TenDoanhNghiep, SoDienThoai, DiaChi, GiayPhep } = req.body;
+    try {
+      const token = req.params.token;
+      const data = await verifyToken(token);
+      console.log(data);
+      const _id = data.data;
+      console.log(_id);
+      var result = await User.findOne({ _id });
+      if (result != null) {
+        var soDienThoai = result.SoDienThoai;
+        var tachSoDienThoai = [];
+        var k=0;
+        for(let i=1;i<soDienThoai.length;i++)
+        {
+          tachSoDienThoai[k]=soDienThoai[i];
+          k++;
+        }
+        tachSoDienThoai.toString();
+        var passwordNew = makePassword(6);
+        const hashPassword = await bcrypt.hash(passwordNew, 5);
+        var updateValue = { Password: hashPassword };
+        await User.findOneAndUpdate({ _id }, updateValue, {
+          new: true,
+        });
+        client.messages
+        .create({
+          body: 'Pass mới của bạn là: '+`${passwordNew}`,
+          from: process.env.Phone,
+          to: '+84'+`${tachSoDienThoai}` //replace this with your registered phone number
+        })
+        .then((data)=> {
+          res.status(200).send({
+            data: "Đổi Password thành công",
+            error: "null",
+          });
+        })
+        .catch((error)=> {
+          res.status(400).send({
+            data: "null",
+            error: "Không gửi được qua SMS vì số điện thoại chưa được xác minh",
+          });
+        });
+      } else {
+        res.status(400).send({
+          error: "Not Found User",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(400).send("Token hết hạn");
+    }
+  }
 }
 module.exports = new MeController();

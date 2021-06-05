@@ -26,6 +26,7 @@ router.delete("/delete-comment", meController.DeleteComment);
 router.put("/change-password", meController.ChangePassword);
 router.put("/edit-information",cpUpload, meController.EditInformationAnh);
 router.get("/send-password-sms", meController.SendPasswordSms);
+router.get("/reset-password-sms/:token", meController.ResetPassword);
 
 
 module.exports = router;
