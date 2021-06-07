@@ -52,12 +52,15 @@ class MeController {
       const confirmPassword = req.body.ConfirmPassword;
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
+      console.log(_id);
       var result = await User.findOne({ _id, Status: "ACTIVE" });
+      console.log(result);
       if (result != null) {
         const isEqualPassword = await bcrypt.compare(
           passwordOld,
           result.Password
         );
+        console.log(isEqualPassword);
         if (isEqualPassword) {
           if (passwordNew == confirmPassword) {
             const hashPassword = await bcrypt.hash(passwordNew, 5);
@@ -77,8 +80,17 @@ class MeController {
           });
         }
       }
+      else
+      {
+        res.status(500).send({
+          data: "null",
+          error: "Token sai",
+        });
+      }
     } catch (error) {
+      console.log(error);
       res.status(500).send({
+        data: "",
         error: error,
       });
     }
