@@ -27,6 +27,7 @@ router.put("/change-password", meController.ChangePassword);
 router.put("/edit-information",cpUpload, meController.EditInformationAnh);
 router.get("/send-password-sms", meController.SendPasswordSms);
 router.get("/reset-password-sms/:token", meController.ResetPassword);
-
+router.delete("/delete-favorite-recipe", meController.DeleteFavortiteRecipe);
+router.delete("/delete-favorite-blog", meController.DeleteFavortiteBlog);
 
 module.exports = router;

@@ -19,6 +19,7 @@ const {
   makePassword,
   UploadImage,
 } = require("./index");
+const { VerificationCheckInstance } = require("twilio/lib/rest/verify/v2/service/verificationCheck");
 class MeController {
   //get me/information / get || post put delete
   async Information(req, res, next) {
@@ -516,5 +517,81 @@ class MeController {
       res.status(400).send("Token hết hạn");
     }
   }
+   //Delete me/delete-favorite-recipe
+   async DeleteFavortiteRecipe(req, res, next) {
+    try {
+      var IDRecipe = req.query.IDRecipe;
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const result = await User.findOne({ _id, Status: "ACTIVE" });
+      if (result != null) {
+        var IDUser = result._doc._id;
+        var check= await FavoriteRecipe.deleteOne({IDUser: IDUser,IDRecipe: IDRecipe});
+        if(check.n == 0)
+        {
+          res.status(200).send({
+            data: "Recipe này hiện tại không được thêm vào danh sách yêu thích",
+            error: "",
+          });
+        }
+        else
+        {
+          res.status(200).send({
+            data: "Xóa thành công",
+            error: "",
+          });
+        }
+      } else {
+        res.status(404).send({
+          error: "User not found",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
+     //Delete me/delete-favorite-blog
+     async DeleteFavortiteBlog(req, res, next) {
+      try {
+        var IDBlog = req.query.IDBlog;
+        const token = req.get("Authorization").replace("Bearer ", "");
+        const _id = await verifyToken(token);
+        const result = await User.findOne({ _id, Status: "ACTIVE" });
+        if (result != null) {
+          var IDUser = result._doc._id;
+          console.log(IDUser);
+          console.log(IDBlog);
+          var check = await FavoriteBlog.deleteOne({IDUser,IDBlog});
+          if(check.n == 0)
+          {
+            res.status(200).send({
+              data: "Blog này hiện tại không được thêm vào danh sách yêu thích",
+              error: "",
+            });
+          }
+          else
+          {
+            res.status(200).send({
+              data: "Xóa thành công",
+              error: "",
+            });
+          }
+        } else {
+          res.status(404).send({
+            error: "User not found",
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({
+          data: "",
+          error: error,
+        });
+      }
+    }
 }
 module.exports = new MeController();
