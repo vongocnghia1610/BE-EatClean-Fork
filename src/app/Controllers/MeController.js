@@ -593,5 +593,81 @@ class MeController {
         });
       }
     }
+    // Get /me/show-blog-favorite
+  async ShowBlogFavorite(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const result = await User.findOne({ _id, Status: "ACTIVE" });
+      var blog = [];
+      if(result!=null)
+      {
+        var blogFavorite = await FavoriteBlog.find({IDUser: result._doc._id});
+        if(blogFavorite.length>0)
+        {
+          for(var i=0;i<blogFavorite.length;i++)
+          {
+             blog[i] = await Blog.findOne( {_id: blogFavorite[i].IDBlog});
+  
+          }
+          res.status(200).send({
+            data: blog,
+            error: "null",
+          });
+        }
+        else
+        {
+          res.status(200).send({
+            data: "Bạn chưa yêu thích bất kỳ Blog nào",
+            error: "null",
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
+    // Get /me/show-blog-recipe
+    async ShowRecipeFavorite(req, res, next) {
+      try {
+        const token = req.get("Authorization").replace("Bearer ", "");
+        const _id = await verifyToken(token);
+        const result = await User.findOne({ _id, Status: "ACTIVE" });
+        var recipe = [];
+        if(result!=null)
+        {
+          var recipeFavorite = await FavoriteRecipe.find({IDUser: result._doc._id});
+          if(recipeFavorite.length>0)
+          {
+            for(var i=0;i<recipeFavorite.length;i++)
+            {
+              recipe[i] = await Recipe.findOne( {_id: recipeFavorite[i].IDRecipe});
+    
+            }
+            res.status(200).send({
+              data: recipe,
+              error: "null",
+            });
+          }
+          else
+          {
+            res.status(200).send({
+              data: "Bạn chưa yêu thích bất kỳ Recipe nào",
+              error: "null",
+            });
+          }
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({
+          data: "",
+          error: error,
+        });
+      }
+    }
 }
 module.exports = new MeController();
