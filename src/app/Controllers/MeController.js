@@ -66,6 +66,8 @@ class MeController {
           if (passwordNew == confirmPassword) {
             const hashPassword = await bcrypt.hash(passwordNew, 5);
             result.Password = hashPassword;
+            const token = await createToken(`${result._id}`);
+            result._doc.token = token;
             result.save();
             res.status(200).send({
               data:result,
@@ -312,6 +314,7 @@ class MeController {
       var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
       if (resultUser != null) {
         if (resultUser.Email == Email) {
+          const token = await createToken(`${resultUser._id}`);
           if (req.files["Image"] != null) {
             var addImage = req.files["Image"][0];
             const urlImage = await UploadImage(addImage.filename, "Avatars/");
@@ -326,6 +329,8 @@ class MeController {
                 new: true,
               }
             );
+            resultUser._doc.token = token;
+            resultUser.save();
             res.status(200).send({
               data: resultUser,
               error: "null",
@@ -341,6 +346,8 @@ class MeController {
                 new: true,
               }
             );
+            resultUser._doc.token = token;
+            resultUser.save();
             res.status(200).send({
               data: resultUser,
               error: "null",
@@ -359,6 +366,7 @@ class MeController {
             if (req.files["Image"] != null) {
               var addImage = req.files["Image"][0];
               const urlImage = await UploadImage(addImage.filename, "Avatars/");
+              const token = await createToken(`${resultUser._id}`);
               resultUser = await User.findOneAndUpdate(
                 { _id, Status: "ACTIVE" },
                 {
@@ -371,6 +379,8 @@ class MeController {
                   new: true,
                 }
               );
+              resultUser._doc.token = token;
+              resultUser.save();
               res.status(200).send({
                 data: resultUser,
                 error: "null",
@@ -387,6 +397,8 @@ class MeController {
                   new: true,
                 }
               );
+              resultUser._doc.token = token;
+              resultUser.save();
               res.status(200).send({
                 data: resultUser,
                 error: "null",
