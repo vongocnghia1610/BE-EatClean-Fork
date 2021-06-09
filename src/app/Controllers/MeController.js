@@ -68,11 +68,12 @@ class MeController {
             result.Password = hashPassword;
             result.save();
             res.status(200).send({
-              Success: "Change Password Success",
+              data:result,
+              error: "null"
             });
           } else {
             res.status(400).send({
-              error: "New password is not same same password confirm",
+              error: "New password is not same password confirm",
             });
           }
         } else {
@@ -603,8 +604,6 @@ class MeController {
       if(result!=null)
       {
         var blogFavorite = await FavoriteBlog.find({IDUser: result._doc._id});
-        if(blogFavorite.length>0)
-        {
           for(var i=0;i<blogFavorite.length;i++)
           {
              blog[i] = await Blog.findOne( {_id: blogFavorite[i].IDBlog});
@@ -614,14 +613,6 @@ class MeController {
             data: blog,
             error: "null",
           });
-        }
-        else
-        {
-          res.status(200).send({
-            data: "Bạn chưa yêu thích bất kỳ Blog nào",
-            error: "null",
-          });
-        }
       }
     } catch (error) {
       console.log(error);
@@ -641,8 +632,6 @@ class MeController {
         if(result!=null)
         {
           var recipeFavorite = await FavoriteRecipe.find({IDUser: result._doc._id});
-          if(recipeFavorite.length>0)
-          {
             for(var i=0;i<recipeFavorite.length;i++)
             {
               recipe[i] = await Recipe.findOne( {_id: recipeFavorite[i].IDRecipe});
@@ -652,14 +641,6 @@ class MeController {
               data: recipe,
               error: "null",
             });
-          }
-          else
-          {
-            res.status(200).send({
-              data: "Bạn chưa yêu thích bất kỳ Recipe nào",
-              error: "null",
-            });
-          }
         }
       } catch (error) {
         console.log(error);
