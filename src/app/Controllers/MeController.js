@@ -673,7 +673,6 @@ class MeController {
       if (recipe != null) {
         var resultComment = [];
         var binhluanRecipe =  await Comment.find({IDRecipe: _id,Status: "ACTIVE"});
-        console.log(binhluanRecipe);
         for(var i=0;i<binhluanRecipe.length;i++)
         {
           var update ={
