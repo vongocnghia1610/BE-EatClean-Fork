@@ -20,6 +20,8 @@ router.post("/create-recipe",cpUpload, collaboratorController.CreateRecipe);
 router.put("/update-recipe",cpUpload, collaboratorController.UpdateRecipe);
 router.delete("/delete-recipe", collaboratorController.DeleteRecipe);
 router.post("/register-collaborator",cpUpload, collaboratorController.RegisterCollaborator);
+router.get("/show-my-recipes", collaboratorController.ShowMyRecipe);
+router.get("/show-my-blogs", collaboratorController.ShowMyBlog);
 
 
 module.exports = router;

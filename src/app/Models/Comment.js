@@ -5,7 +5,6 @@ const Comment = new Schema(
   {
     IDUser: { type: String, required: true },
     IDRecipe: { type: String, default: null },
-    Stars: { type: Number, required: true },
     Comment: { type: String, required: true },
     Status: {type:String , default: "ACTIVE"},
   },
