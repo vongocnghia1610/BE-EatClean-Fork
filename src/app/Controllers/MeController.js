@@ -163,7 +163,8 @@ class MeController {
   // Get /me/show-blog
   async ShowBlog(req, res, next) {
     try {
-      var listBlog = await Blog.find({ Status: "CONFIRM" });
+      var listBlog = await Blog.find({ Status: "CONFIRM" }).sort({createdAt: -1});
+      // var listBlog = await Blog.find({ Status: "CONFIRM" });
       res.status(200).send({
         data: listBlog,
         error: "",
@@ -179,7 +180,7 @@ class MeController {
   // Get /me/show-recipe
   async ShowRecipe(req, res, next) {
     try {
-      var listRecipe = await Recipe.find({ Status: "CONFIRM" });
+      var listRecipe = await Recipe.find({ Status: "CONFIRM" }).sort({createdAt: -1});
       res.status(200).send({
         data: listRecipe,
         error: "",
@@ -615,7 +616,7 @@ class MeController {
       var blog = [];
       if(result!=null)
       {
-        var blogFavorite = await FavoriteBlog.find({IDUser: result._doc._id});
+        var blogFavorite = await FavoriteBlog.find({IDUser: result._doc._id}).sort({createdAt: 1});
           for(var i=0;i<blogFavorite.length;i++)
           {
              blog[i] = await Blog.findOne( {_id: blogFavorite[i].IDBlog});
@@ -643,7 +644,7 @@ class MeController {
         var recipe = [];
         if(result!=null)
         {
-          var recipeFavorite = await FavoriteRecipe.find({IDUser: result._doc._id});
+          var recipeFavorite = await FavoriteRecipe.find({IDUser: result._doc._id}).sort({createdAt: 1});
             for(var i=0;i<recipeFavorite.length;i++)
             {
               recipe[i] = await Recipe.findOne( {_id: recipeFavorite[i].IDRecipe});
