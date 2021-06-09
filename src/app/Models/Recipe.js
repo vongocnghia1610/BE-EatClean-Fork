@@ -11,6 +11,7 @@ const Recipe = new Schema(
     Steps: { type: String, required: true },
     IDAuthor: {type: String, required: true},
     ImageMain: {type: String, default: null},
+    Time: {type: Number, required: true},
     Status: {type: String, default: "INCONFIRM"},
   },
   {

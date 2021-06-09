@@ -257,6 +257,7 @@ class CollaboratorController {
       const NutritionalIngredients = req.body.NutritionalIngredients;
       const Ingredients = req.body.Ingredients;
       const Steps = req.body.Steps;
+      const Time = req.body.Time;
       const Image = req.files["Image"];
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
@@ -271,6 +272,7 @@ class CollaboratorController {
                 NutritionalIngredients,
                 Ingredients,
                 Steps,
+                Time,
                 IDAuthor: userDb._doc._id,
               });
         const id_Recipe= recipe._doc._id;
@@ -326,6 +328,7 @@ class CollaboratorController {
       const NutritionalIngredients = req.body.NutritionalIngredients;
       const Ingredients = req.body.Ingredients;
       const Steps = req.body.Steps;
+      const Time = req.body.Time;
       const Image = req.files["Image"];
       var _IDRecipe = req.body.IDRecipe;
       var update = {
@@ -352,6 +355,7 @@ class CollaboratorController {
             NutritionalIngredients,
             Ingredients,
             Steps,
+            Time,
             IDAuthor: userDb._doc._id,
           });
           const id_Recipe= recipeNew._doc._id;
