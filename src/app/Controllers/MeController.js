@@ -663,5 +663,49 @@ class MeController {
         });
       }
     }
+
+     // get show-comment-recipe
+  async ShowCommentRecipe(req, res, next) {
+    try {
+      var _id = req.query.IDRecipe;
+      console.log(_id);
+      const recipe = await Recipe.findOne({ _id, Status: "CONFIRM" });
+      if (recipe != null) {
+        var resultComment = [];
+        var binhluanRecipe =  await Comment.find({IDRecipe: _id,Status: "ACTIVE"});
+        console.log(binhluanRecipe);
+        for(var i=0;i<binhluanRecipe.length;i++)
+        {
+          var update ={
+            _idComment: "",
+            Comment: "",
+            IDRecipe: "",
+            Image: "",
+          }
+          const user = await User.findOne({ _id: binhluanRecipe[i].IDUser, Status: "ACTIVE" });
+          update._idComment=  binhluanRecipe[i]._id;
+          update.Image = user.Image;
+          update.Comment =  binhluanRecipe[i].Comment;
+          update.IDRecipe =  binhluanRecipe[i].IDRecipe;
+          resultComment[i] = update;
+        }
+        res.status(200).send({
+          data: resultComment,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "Not Found Recipe",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
 }
 module.exports = new MeController();

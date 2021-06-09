@@ -31,5 +31,6 @@ router.delete("/delete-favorite-recipe", meController.DeleteFavortiteRecipe);
 router.delete("/delete-favorite-blog", meController.DeleteFavortiteBlog);
 router.get("/show-blog-favorite", meController.ShowBlogFavorite);
 router.get("/show-recipe-favorite", meController.ShowRecipeFavorite);
+router.get("/show-comment-recipe", meController.ShowCommentRecipe);
 
 module.exports = router;
