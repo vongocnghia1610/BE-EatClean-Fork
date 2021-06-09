@@ -434,5 +434,60 @@ class CollaboratorController {
       });
     }
   }
+
+  //get collaborator/show-my-recipes
+  async ShowMyRecipe(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName == "Collaborator") {
+        var myRecipe = await Recipe.find({IDAuthor: userDb._doc._id}).sort({createdAt: -1});
+        res.status(200).send({
+          data: myRecipe,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
+  //get collaborator/show-my-blogs
+  async ShowMyBlog(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      const userDb = await User.findOne({ _id, Status: "ACTIVE" });
+      var role = await Role.findOne({ _id: userDb._doc.IDRole });
+      if (role._doc.RoleName == "Collaborator") {
+        var myBlog = await Blog.find({IDAuthor: userDb._doc._id}).sort({createdAt: -1});
+        res.status(200).send({
+          data: myBlog,
+          error: "",
+        });
+      } else {
+        res.status(400).send({
+          data: "",
+          error: "No Autheraziton",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: error,
+        error: "Internal Server Error",
+      });
+    }
+  }
 }
 module.exports = new CollaboratorController();
