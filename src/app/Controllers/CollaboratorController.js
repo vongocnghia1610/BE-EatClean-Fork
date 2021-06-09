@@ -211,6 +211,9 @@ class CollaboratorController {
     }
   }
 
+
+    
+
   // Delete collaborator/delete-blog
   async DeleteBlog(req, res, next) {
     try {
@@ -338,8 +341,9 @@ class CollaboratorController {
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var recipe = await Recipe.findOne({ _id: _IDRecipe });
+      var urlImageMain ;
       if (recipe._doc.IDAuthor == userDb._doc._id ) {
-        if(recipe._doc.Status == "INCONFIRM")
+        if(req.files["Image"] != null)
         {
           await Recipe.findOneAndUpdate(
             { _id:  _IDRecipe},
@@ -357,32 +361,81 @@ class CollaboratorController {
             Steps,
             Time,
             IDAuthor: userDb._doc._id,
+            status: "INCONFIRM",
           });
           const id_Recipe= recipeNew._doc._id;
           for (let i=0;i<Image.length;i++)
           {
             var addImage = req.files["Image"][i];
             const urlImage = await UploadImage(addImage.filename, "RecipeImages/");
+            if(i==0)
+            {
+              urlImageMain = urlImage;
+            }
             await RecipeImage.create({
               RecipeImages: urlImage,
               IDRecipe: id_Recipe,
             });
           }
-          const showImage = await RecipeImage.find({IDRecipe: id_Recipe})
+          recipe = await Recipe.findOneAndUpdate(
+            { _id: id_Recipe },
+            {
+              ImageMain: urlImageMain,
+            },
+            {
+              new: true,
+            }
+          );
+          var showImage = await RecipeImage.find({IDRecipe: id_Recipe})
           res.status(200).send({
-            data: recipeNew,
+            data: recipe,
             Image: showImage,
             error: "",
           });
         }
         else
         {
-          res.status(400).send({
-            data: "",
-            error: "Recipe Confirmed",
+          var recipeOld= await Recipe.findOneAndUpdate(
+            { _id:  _IDRecipe},
+            update,
+            {
+              new: true,
+            }
+          );
+          var urlImageMain =  recipeOld.ImageMain;
+          const recipeNew = await Recipe.create({
+            RecipesTitle,
+            RecipesContent,
+            RecipesAuthor: userDb._doc.FullName,
+            NutritionalIngredients,
+            Ingredients,
+            Steps,
+            ImageMain: urlImageMain,
+            Time,
+            IDAuthor: userDb._doc._id,
+            status: "INCONFIRM",
+          });
+          var imageRecipeOld =  await RecipeImage.find({IDRecipe: recipeOld._id});
+          var idRecipeNew = recipeNew._id;
+          for(let i=0;i<imageRecipeOld.length;i++)
+          {
+            await RecipeImage.findOneAndUpdate(
+              { _id:  imageRecipeOld[i]._doc._id},
+              {
+                IDRecipe: idRecipeNew
+              },
+              {
+                new: true,
+              }
+            );
+          }
+          var showImage = await RecipeImage.find({IDRecipe: recipeNew._doc._id});
+          res.status(200).send({
+            data: recipeNew,
+            Image: showImage,
+            error: "",
           });
         }
-       
       } else {
         res.status(400).send({
           data: "",
