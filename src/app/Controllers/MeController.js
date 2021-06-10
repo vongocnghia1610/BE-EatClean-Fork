@@ -668,7 +668,6 @@ class MeController {
   async ShowCommentRecipe(req, res, next) {
     try {
       var _id = req.query.IDRecipe;
-      console.log(_id);
       const recipe = await Recipe.findOne({ _id, Status: "CONFIRM" });
       if (recipe != null) {
         var resultComment = [];
@@ -680,12 +679,14 @@ class MeController {
             Comment: "",
             IDRecipe: "",
             Image: "",
+            Username:"",
           }
           const user = await User.findOne({ _id: binhluanRecipe[i].IDUser, Status: "ACTIVE" });
           update._idComment=  binhluanRecipe[i]._id;
           update.Image = user.Image;
           update.Comment =  binhluanRecipe[i].Comment;
           update.IDRecipe =  binhluanRecipe[i].IDRecipe;
+          update.Username =  user.Username;
           resultComment[i] = update;
         }
         res.status(200).send({
