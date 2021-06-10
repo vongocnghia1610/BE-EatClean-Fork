@@ -671,22 +671,25 @@ class MeController {
       const recipe = await Recipe.findOne({ _id, Status: "CONFIRM" });
       if (recipe != null) {
         var resultComment = [];
-        var binhluanRecipe =  await Comment.find({IDRecipe: _id,Status: "ACTIVE"});
+        var binhluanRecipe =  await Comment.find({IDRecipe: _id,Status: "ACTIVE"}).sort({createdAt: -1});
         for(var i=0;i<binhluanRecipe.length;i++)
         {
           var update ={
-            _idComment: "",
+            _id: "",
             Comment: "",
             IDRecipe: "",
             Image: "",
             Username:"",
+            IDUser: ""
           }
           const user = await User.findOne({ _id: binhluanRecipe[i].IDUser, Status: "ACTIVE" });
-          update._idComment=  binhluanRecipe[i]._id;
+          update._id=  binhluanRecipe[i]._id;
           update.Image = user.Image;
           update.Comment =  binhluanRecipe[i].Comment;
           update.IDRecipe =  binhluanRecipe[i].IDRecipe;
           update.Username =  user.Username;
+          update.IDUser =  user._id;
+
           resultComment[i] = update;
         }
         res.status(200).send({
