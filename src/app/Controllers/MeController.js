@@ -421,6 +421,43 @@ class MeController {
       });
     }
   }
+  async EditAnh(req, res, next) {
+    try {
+      const token = req.get("Authorization").replace("Bearer ", "");
+      const _id = await verifyToken(token);
+      var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
+      if (resultUser != null) {
+            var addImage = req.files["Image"][0];
+            const urlImage = await UploadImage(addImage.filename, "Avatars/");
+            resultUser = await User.findOneAndUpdate(
+              { _id, Status: "ACTIVE" },
+              {
+                Image: urlImage,
+              },
+              {
+                new: true,
+              }
+            );
+            res.status(200).send({
+              data: resultUser,
+              error: "null",
+            });
+      }
+      else
+      {
+        res.status(404).send({
+          data: "",
+          error: "Not found user!",
+        });
+      }   
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        data: "",
+        error: error,
+      });
+    }
+  }
 
     //get me/send-password-sms
     async SendPasswordSms(req, res, next) {

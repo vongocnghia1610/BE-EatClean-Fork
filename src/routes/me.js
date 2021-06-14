@@ -32,5 +32,6 @@ router.delete("/delete-favorite-blog", meController.DeleteFavortiteBlog);
 router.get("/show-blog-favorite", meController.ShowBlogFavorite);
 router.get("/show-recipe-favorite", meController.ShowRecipeFavorite);
 router.get("/show-comment-recipe", meController.ShowCommentRecipe);
+router.put("/edit-avatar",cpUpload, meController.EditAnh);
 
 module.exports = router;
