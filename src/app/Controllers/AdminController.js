@@ -25,6 +25,7 @@ class MeController {
       var role = await Role.findOne({ _id: userDb._doc.IDRole });
       if (role._doc.RoleName == "Admin") {
         var listBlog = await Blog.find({ Status: "INCONFIRM" });
+        console.log(listBlog)
         res.status(200).send({
           data: listBlog,
           error: "",
@@ -36,6 +37,7 @@ class MeController {
         });
       }
     } catch (error) {
+      console.log(error);
       res.status(500).send({
         data: "",
         error: error,
@@ -258,11 +260,13 @@ class MeController {
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var role = await Role.findOne({ _id: userDb._doc.IDRole });
       if (role.RoleName == "Admin") {
-        var imageBlog = await BlogImage.find({ IDBlog: _IDBlog });
-        for (let i = 0; i < imageBlog.length; i++) {
-          await BlogImage.deleteOne({ IDBlog: _IDBlog });
-        }
-        await Blog.deleteOne({ _id: _IDBlog });
+        var update = {Status: "Deleted"};
+        var updateBlog = await Blog.findOneAndUpdate( {_id: _IDBlog},
+          update,
+          {
+            new: true,
+          }
+          );
         res.status(200).send({
           data: "Xóa thành công",
           error: "",
@@ -289,11 +293,14 @@ class MeController {
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var role = await Role.findOne({ _id: userDb._doc.IDRole });
       if (role.RoleName == "Admin") {
-        var imageRecipe = await RecipeImage.find({ IDRecipe: _IDRecipe });
-        for (let i = 0; i < imageRecipe.length; i++) {
-          await RecipeImage.deleteOne({ IDRecipe: _IDRecipe });
-        }
-        await Recipe.deleteOne({ _id: _IDRecipe });
+        var update = {Status: "Deleted"};
+        var updateRecipe = await Recipe.findOneAndUpdate( 
+          {_id: _IDRecipe},
+          update,
+          {
+            new: true,
+          }
+          );
         res.status(200).send({
           data: "Xóa thành công",
           error: "",
