@@ -28,6 +28,9 @@ class MeController {
       const _id = await verifyToken(token);
       var resultUser = await User.findOne({ _id, Status: "ACTIVE" }); //muc dich la lay role
       if (resultUser != null) {
+        var token1 = await createToken(`${resultUser._id}`);
+        resultUser._doc.token = token1;
+        resultUser.save();
         res.status(200).send({
           data: resultUser,
           error: "null",
