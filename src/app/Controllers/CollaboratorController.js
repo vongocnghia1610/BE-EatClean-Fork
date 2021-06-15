@@ -146,26 +146,27 @@ class CollaboratorController {
       const BlogContent = req.body.BlogContent;
       const Image = req.files["Image"];
       var _IDBlog = req.body.IDBlog;
-      var update = {
-        Status: "Deleted",
-      };
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
       var blog = await Blog.findOne({ _id: _IDBlog });
       if (blog._doc.IDAuthor == userDb._doc._id) {
         if (req.files["Image"] != null) {
-          await Blog.findOneAndUpdate({ _id: _IDBlog }, update, {
-            new: true,
-          });
-          const blogNew = await Blog.create({
+          await Blog.findOneAndUpdate(
+          { _id: _IDBlog },
+          {
             BlogTitle,
             BlogAuthor: userDb._doc.FullName,
             BlogContent,
             IDAuthor: userDb._doc._id,
-          });
+            Status: "INCONFIRM"
+          },
+          {
+            new: true,
+          }
+          );
           var urlImageMain;
-          const id_Blog = blogNew._doc._id;
+          await BlogImage.deleteMany({IDBlog: _IDBlog});
           for (let i = 0; i < Image.length; i++) {
             var addImage = req.files["Image"][i];
             const urlImage = await UploadImage(
@@ -177,11 +178,11 @@ class CollaboratorController {
             }
             await BlogImage.create({
               BlogImages: urlImage,
-              IDBlog: id_Blog,
+              IDBlog: _IDBlog,
             });
           }
           blog = await Blog.findOneAndUpdate(
-            { _id: id_Blog },
+            { _id: _IDBlog },
             {
               ImageMain: urlImageMain,
             },
@@ -189,49 +190,31 @@ class CollaboratorController {
               new: true,
             }
           );
-          const showImage = await BlogImage.find({ IDBlog: id_Blog });
+          const showImage = await BlogImage.find({ IDBlog: _IDBlog });
           res.status(200).send({
             data: blog,
             Image: showImage,
             error: "",
           });
         } else {
-          var blogOld = await Blog.findOneAndUpdate(
+          const blogUpdate = await Blog.findOneAndUpdate(
             { _id: _IDBlog },
-            update,
+            {
+              BlogTitle,
+              BlogAuthor: userDb._doc.FullName,
+              BlogContent,
+              IDAuthor: userDb._doc._id,
+              Status: "INCONFIRM"
+            },
             {
               new: true,
             }
-          );
-          var urlImageMain = blogOld.ImageMain;
-          console.log(urlImageMain);
-          const blogNew = await Blog.create({
-            BlogTitle,
-            BlogAuthor: userDb._doc.FullName,
-            BlogContent,
-            IDAuthor: userDb._doc._id,
-            ImageMain: urlImageMain,
-          });
-          var imageBlogOld = await BlogImage.find({
-            IDBlog: blogOld._id,
-          });
-          var idBlogNew = blogNew._id;
-          for (let i = 0; i < imageBlogOld.length; i++) {
-            await BlogImage.findOneAndUpdate(
-              { _id: imageBlogOld[i]._doc._id },
-              {
-                IDBlog: idBlogNew,
-              },
-              {
-                new: true,
-              }
             );
-          }
           var showImage = await BlogImage.find({
-            IDBlog: blogNew._doc._id,
+            IDBlog: _IDBlog,
           });
           res.status(200).send({
-            data: blogNew,
+            data: blogUpdate,
             Image: showImage,
             error: "",
           });
@@ -372,9 +355,6 @@ class CollaboratorController {
       const Time = req.body.Time;
       const Image = req.files["Image"];
       var _IDRecipe = req.body.IDRecipe;
-      var update = {
-        Status: "Deleted",
-      };
       const token = req.get("Authorization").replace("Bearer ", "");
       const _id = await verifyToken(token);
       const userDb = await User.findOne({ _id, Status: "ACTIVE" });
@@ -382,10 +362,9 @@ class CollaboratorController {
       var urlImageMain;
       if (recipe._doc.IDAuthor == userDb._doc._id) {
         if (req.files["Image"] != null) {
-          await Recipe.findOneAndUpdate({ _id: _IDRecipe }, update, {
-            new: true,
-          });
-          const recipeNew = await Recipe.create({
+          await Recipe.findOneAndUpdate(
+            {_id: _IDRecipe },
+            {
             RecipesTitle,
             RecipesContent,
             RecipesAuthor: userDb._doc.FullName,
@@ -394,9 +373,13 @@ class CollaboratorController {
             Steps,
             Time,
             IDAuthor: userDb._doc._id,
-            status: "INCONFIRM",
-          });
-          const id_Recipe = recipeNew._doc._id;
+            Status: "INCONFIRM",
+          },
+          {
+            new: true
+          }
+          );
+          await RecipeImage.deleteMany({IDRecipe: _IDRecipe});
           for (let i = 0; i < Image.length; i++) {
             var addImage = req.files["Image"][i];
             const urlImage = await UploadImage(
@@ -408,11 +391,11 @@ class CollaboratorController {
             }
             await RecipeImage.create({
               RecipeImages: urlImage,
-              IDRecipe: id_Recipe,
+              IDRecipe: _IDRecipe,
             });
           }
           recipe = await Recipe.findOneAndUpdate(
-            { _id: id_Recipe },
+            { _id: _IDRecipe },
             {
               ImageMain: urlImageMain,
             },
@@ -420,53 +403,35 @@ class CollaboratorController {
               new: true,
             }
           );
-          var showImage = await RecipeImage.find({ IDRecipe: id_Recipe });
+          var showImage = await RecipeImage.find({ IDRecipe: _IDRecipe });
           res.status(200).send({
             data: recipe,
             Image: showImage,
             error: "",
           });
         } else {
-          var recipeOld = await Recipe.findOneAndUpdate(
-            { _id: _IDRecipe },
-            update,
+          const updateRecipe = await Recipe.findOneAndUpdate(
+            {_id: _IDRecipe },
             {
-              new: true,
-            }
-          );
-          var urlImageMain = recipeOld.ImageMain;
-          const recipeNew = await Recipe.create({
             RecipesTitle,
             RecipesContent,
             RecipesAuthor: userDb._doc.FullName,
             NutritionalIngredients,
             Ingredients,
             Steps,
-            ImageMain: urlImageMain,
             Time,
             IDAuthor: userDb._doc._id,
-            status: "INCONFIRM",
+            Status: "INCONFIRM",
+          },
+          {
+            new: true
           });
-          var imageRecipeOld = await RecipeImage.find({
-            IDRecipe: recipeOld._id,
-          });
-          var idRecipeNew = recipeNew._id;
-          for (let i = 0; i < imageRecipeOld.length; i++) {
-            await RecipeImage.findOneAndUpdate(
-              { _id: imageRecipeOld[i]._doc._id },
-              {
-                IDRecipe: idRecipeNew,
-              },
-              {
-                new: true,
-              }
-            );
-          }
+          console.log(updateRecipe);
           var showImage = await RecipeImage.find({
-            IDRecipe: recipeNew._doc._id,
+            IDRecipe: _IDRecipe,
           });
           res.status(200).send({
-            data: recipeNew,
+            data: updateRecipe,
             Image: showImage,
             error: "",
           });
