@@ -150,7 +150,7 @@ class MeController {
         console.log(findFavortieRecipe);
         if(findFavortieRecipe.length!=0)
         {
-          res.status(200).send({
+          res.status(404).send({
             data: "null",
             error: "Bạn đã có Recipe này trong danh sách yêu thích",
           });
