@@ -146,11 +146,23 @@ class MeController {
           IDUser: result._doc._id,
           IDRecipe,
         };
-        var favoriteRecipe = await FavoriteRecipe.create(fv);
-        res.status(200).send({
-          data: favoriteRecipe,
-          error: "",
-        });
+        var findFavortieRecipe = await FavoriteRecipe.find({IDUser: result._doc._id, IDRecipe: IDRecipe});
+        console.log(findFavortieRecipe);
+        if(findFavortieRecipe.length!=0)
+        {
+          res.status(200).send({
+            data: "null",
+            error: "Bạn đã có Recipe này trong danh sách yêu thích",
+          });
+        }
+        else
+        {
+          var favoriteRecipe = await FavoriteRecipe.create(fv);
+          res.status(200).send({
+            data: favoriteRecipe,
+            error: "",
+          });
+        }
       } else {
         res.status(404).send({
           error: "User not found",
