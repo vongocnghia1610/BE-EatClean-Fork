@@ -6,6 +6,8 @@ const bodyParser = require("body-parser");
 const db = require("./config/db");
 const port = process.env.PORT || 8000;
 const route = require("./routes");
+const route2 = require("./routes");
+const route3 = require("./routes");
 
 db.connect(process.env.DB_URL);
 app.use(express.json());
